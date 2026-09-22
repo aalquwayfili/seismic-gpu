@@ -1,16 +1,19 @@
 # Seismic imaging in Julia
 
-A small seismic imaging experiment in Julia and CUDA.jl. It simulates sound in a
-2D, two-layer model, records the echoes, and uses reverse-time migration to image
-the layer boundary.
+Seismic wave simulation and reverse-time migration in Julia and CUDA.jl.
 
-[Seeing underground with sound](https://aalquwayfili.com/writing/seismic-imaging-from-zero/)
-explains the experiment and the recorded RTX 5070 benchmarks.
+A sound pulse travels through a 2D model with two rock layers. At the boundary,
+part of the wave reflects back toward the surface; the rest continues into the
+lower layer. We record those echoes and use reverse-time migration to estimate
+where the boundary is.
 
 ![Six snapshots of a wave reflecting from a tilted layer and travelling through faster rock below it.](docs/images/wave-propagation.webp)
 
 One shot at six times. The green line marks the layer boundary. Each panel uses
 its own pressure scale.
+
+[Seeing underground with sound](https://aalquwayfili.com/writing/seismic-imaging-from-zero/)
+walks through the physics, the code, and the recorded RTX 5070 benchmarks.
 
 ## Run
 

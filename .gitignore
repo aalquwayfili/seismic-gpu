@@ -1,0 +1,7 @@
+Manifest.toml
+out/
+figs/
+*.f32
+*.nsys-rep
+*.ncu-rep
+.DS_Store

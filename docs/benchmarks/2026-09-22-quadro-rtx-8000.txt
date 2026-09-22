@@ -1,0 +1,144 @@
+Quadro RTX 8000 validation, 22 September 2026
+
+Solver, benchmark and GPU test source: 21ec066081b69c16eb88fb5120fc3fb0a9a4f475
+No changes to src/, test/, Project.toml or the benchmark entrypoints during this run.
+The working tree added the validation recorder, CI and README instructions.
+
+Single-device timings use GPU 0, with no other compute jobs on that device.
+GPU 1 was busy with unrelated jobs (92% utilisation before, 80% after).
+Two-device tests establish correctness only; their timings are not scaling results.
+No background workloads were stopped.
+
+Grid: 4096 x 4096; 20 warm-up steps; 300 timed steps per run; three runs.
+GPts/s counts interior points; GB/s and %copy are traffic estimates, not counters.
+Medians from the printed GPts/s values:
+  Float32 cols:  3.37
+  Float32 rows: 35.90
+  Float32 tile: 29.78
+  Float32 reg:  33.43
+  Float64 rows: 8.31
+
+Commands:
+  julia --project=. test/gpu.jl
+  julia --project=. scripts/wave2d.jl bench n=4096 steps=300 all=1
+  julia --project=. scripts/wave2d.jl bench n=4096 steps=300 T=Float64 kernel=rows
+
+=== revision ===
+21ec066081b69c16eb88fb5120fc3fb0a9a4f475
+ M README.md
+?? .github/
+?? scripts/validate.jl
+UTC: 2026-09-22T15:09:00.255
+
+=== environment ===
+Julia Version 1.12.7
+Commit 6d172b025e4 (2026-08-15 08:05 UTC)
+Build Info:
+  Official https://julialang.org release
+Platform Info:
+  OS: Linux (x86_64-linux-gnu)
+  CPU: 32 × Intel(R) Core(TM) i9-9960X CPU @ 3.10GHz
+  WORD_SIZE: 64
+  LLVM: libLLVM-18.1.7 (ORCJIT, skylake-avx512)
+  GC: Built with stock GC
+Threads: 1 default, 1 interactive, 1 GC (on 32 virtual cores)
+Environment:
+  JULIA_DEPOT_PATH = /tmp/seismic-julia-depot:/home/aalquwayfili/.julia
+Status `~/Projects/seismic-gpu/Project.toml`
+  [052768ef] CUDA v6.4.0
+  [91a5bcdd] Plots v1.41.7
+CUDA toolchain: 
+- runtime 13.4.0, artifact installation
+- driver 580.178.4 for CUDA 13.3, forward-compatible
+- compiler 13.4.59, artifact installation
+
+CUDA libraries: 
+- cuBLAS: 13.7.0
+- cuSPARSE: 12.8.6
+- cuSOLVER: 12.3.2
+- cuFFT: 12.4.0
+- cuRAND: 10.4.4
+- CUPTI: 2026.3.0 (API 13.4.0)
+- NVML: 13.0.0+580.178.4
+
+Julia packages: 
+- CUDACore: 6.4.0
+- GPUArrays: 11.5.14
+- GPUCompiler: 2.8.0
+- KernelAbstractions: 0.9.42
+- CUDA_Driver_jll: 13.3.4+0
+- CUDA_Compiler_jll: 0.6.3+0
+- CUDA_Runtime_jll: 0.25.0+0
+- NVPTX_LLVM_Backend_jll: 23.1.1+3
+
+Toolchain:
+- Julia: 1.12.7
+- LLVM: 18.1.7
+
+2 devices:
+  0: Quadro RTX 8000 (sm_75, 47.258 GiB / 48.000 GiB available)
+     compiles to sm_75 / PTX 9.4 (LLVM: sm_75 / PTX 9.2)
+  1: Quadro RTX 8000 (sm_75, 21.477 GiB / 48.000 GiB available)
+     compiles to sm_75 / PTX 9.4 (LLVM: sm_75 / PTX 9.2)
+
+=== gpu-tests ===
+Test Summary:                       | Pass  Total  Time
+Kernel agreement on a partial block |    4      4  6.2s
+Test Summary:           | Pass  Total   Time
+Boundary reconstruction |    4      4  11.6s
+2 GPUs (0,0): 128×128  0.056 ms/step  0.26 GPts/s
+check vs one GPU: max|diff| = 0.000e+00  (max|u| = 8.659e-02)
+2 GPUs (0,0) overlap: 128×128  0.044 ms/step  0.33 GPts/s
+check vs one GPU: max|diff| = 0.000e+00  (max|u| = 8.659e-02)
+2 GPUs (0,1): 128×128  1.324 ms/step  0.01 GPts/s
+check vs one GPU: max|diff| = 0.000e+00  (max|u| = 8.659e-02)
+2 GPUs (0,1) overlap: 128×128  1.263 ms/step  0.01 GPts/s
+check vs one GPU: max|diff| = 0.000e+00  (max|u| = 8.659e-02)
+Test Summary: | Pass  Total  Time
+Split grid    |    4      4  3.8s
+
+=== float32-1 ===
+GPU: Quadro RTX 8000
+copy bandwidth (Float32, 4096×4096): 562 GB/s
+kernel T         ms/step    GPts/s      GB/s   %copy
+cols   Float32     5.012      3.33        53      9%
+rows   Float32     0.466     35.86       574    102%
+tile   Float32     0.559     29.89       478     85%
+reg    Float32     0.500     33.42       535     95%
+
+=== float64-1 ===
+GPU: Quadro RTX 8000
+copy bandwidth (Float64, 4096×4096): 563 GB/s
+kernel T         ms/step    GPts/s      GB/s   %copy
+rows   Float64     1.986      8.42       269     48%
+
+=== float32-2 ===
+GPU: Quadro RTX 8000
+copy bandwidth (Float32, 4096×4096): 561 GB/s
+kernel T         ms/step    GPts/s      GB/s   %copy
+cols   Float32     4.959      3.37        54     10%
+rows   Float32     0.465     35.90       574    102%
+tile   Float32     0.561     29.78       477     85%
+reg    Float32     0.500     33.43       535     95%
+
+=== float64-2 ===
+GPU: Quadro RTX 8000
+copy bandwidth (Float64, 4096×4096): 564 GB/s
+kernel T         ms/step    GPts/s      GB/s   %copy
+rows   Float64     2.034      8.22       263     47%
+
+=== float32-3 ===
+GPU: Quadro RTX 8000
+copy bandwidth (Float32, 4096×4096): 562 GB/s
+kernel T         ms/step    GPts/s      GB/s   %copy
+cols   Float32     4.942      3.38        54     10%
+rows   Float32     0.465     35.91       575    102%
+tile   Float32     0.564     29.63       474     84%
+reg    Float32     0.500     33.44       535     95%
+
+=== float64-3 ===
+GPU: Quadro RTX 8000
+copy bandwidth (Float64, 4096×4096): 563 GB/s
+kernel T         ms/step    GPts/s      GB/s   %copy
+rows   Float64     2.012      8.31       266     47%
+

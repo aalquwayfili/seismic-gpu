@@ -1,0 +1,29 @@
+name: Tests
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GKSwstype: '100'
+      JULIA_NUM_THREADS: '2'
+      JULIA_NUM_PRECOMPILE_TASKS: '2'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: '1.12'
+      - uses: julia-actions/cache@v3
+        with:
+          delete-old-caches: 'false'
+      - name: Install dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      - name: Numerical tests
+        run: julia --project=. test/runtests.jl
+      - name: Plot tests
+        run: julia --project=. test/plots.jl

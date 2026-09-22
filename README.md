@@ -53,7 +53,35 @@ separate memory-copy test; it is not a measurement of DRAM utilisation.
 ![Recorded RTX 5070 kernel rates: 7.8 GPts/s in Float64, 5.6 with strided access, 33.5 with coalesced access, 31.1 with shared memory, and 33.2 with a register window.](docs/images/kernel-benchmarks.webp)
 
 Recorded results from the article: RTX 5070, 4096 × 4096 grid, 300 timed steps.
-These are the earlier measurements, not a new run of this revision.
+These are earlier measurements from the RTX 5070. A fresh run on that PC is pending.
+
+On 22 September 2026, the current solver passed all 12 GPU checks on two
+Quadro RTX 8000s. Single-device results on GPU 0, using the same grid and step
+count, were:
+
+| Kernel | Precision | Median GPts/s (3 runs) |
+| --- | --- | ---: |
+| Strided | Float32 | 3.37 |
+| Coalesced | Float32 | 35.90 |
+| Shared-memory tile | Float32 | 29.78 |
+| Register window | Float32 | 33.43 |
+| Coalesced | Float64 | 8.31 |
+
+[Raw results, source commit and environment](docs/benchmarks/2026-09-22-quadro-rtx-8000.txt).
+These establish a workstation baseline. The older RTX 5070 results used different
+code and Windows, so they are not a controlled comparison.
+
+To validate a machine and record three runs of each benchmark:
+
+```sh
+julia --project=. scripts/validate.jl
+```
+
+Run this after installing dependencies, with the benchmark GPU idle. Results go
+to a dated directory under `out/`, alongside the commit, dependency versions,
+hardware details and GPU test output. Benchmarks use device 0; the tests also
+check transfers between two devices when available. Use the same commit on each
+machine for a comparison.
 
 ## Two devices
 
@@ -67,10 +95,10 @@ The grid splits along depth, with four halo rows exchanged each step. `check=1`
 compares the result with a single-device run and fails if they disagree.
 `devices=0,0` checks the split on one physical GPU.
 
-The earlier implementation was checked with both halves on one RTX 5070. This
-version corrects the copy stream's event waits. It still needs a CUDA test run,
-including transfers between two physical GPUs. There are no measured two-GPU
-scaling results yet.
+The split-grid checks pass on two physical Quadro RTX 8000s at 128 × 128, with
+and without transfer overlap. Both match the single-device result in the test.
+GPU 1 had other jobs running, so clean two-GPU scaling measurements are still
+pending. The test output is included in the raw results above.
 
 ## Tests
 
@@ -92,7 +120,7 @@ it checks two physical devices when both are present.
 src/          Numerical helpers, wave kernels, migration and grid splitting
 scripts/      Commands for demos, benchmarks, experiments and plotting
 test/         CPU, plotting and CUDA checks
-docs/images/  Figures used in this README
+docs/         README figures and recorded benchmark results
 ```
 
 Run the commands from the repository root. The scripts write to `out/` or `figs/`;
